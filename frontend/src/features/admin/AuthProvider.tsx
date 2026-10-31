@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { setIgnoreOwnVisits } from '@/services/analytics'
 import * as authService from '@/services/auth'
 import type { User } from '@/types/api'
 
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return
         setUser(me)
         setStatus(me ? 'authenticated' : 'anonymous')
+        if (me) setIgnoreOwnVisits(true) // the owner's own browsing shouldn't skew the stats
       } catch {
         if (!cancelled) setStatus('anonymous')
       }
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authService.login(username, password)
     setUser(await authService.fetchCurrentUser())
     setStatus('authenticated')
+    setIgnoreOwnVisits(true)
   }, [])
 
   const logout = useCallback(async () => {

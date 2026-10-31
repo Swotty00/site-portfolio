@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { useI18n } from '@/features/i18n/I18nProvider'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useProfile } from '@/hooks/useContent'
+import { usePageviews } from '@/hooks/usePageviews'
 import { AboutOverlay } from './AboutOverlay'
 import { Footer } from './Footer'
 import { Header } from './Header'
@@ -12,6 +13,7 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 export function Layout() {
   const { t } = useI18n()
   const { data: profile } = useProfile()
+  usePageviews()
   const [aboutOpen, setAboutOpen] = useState(false)
   const [origin, setOrigin] = useState({ x: 48, y: 40 })
   const triggerRef = useRef<HTMLElement | null>(null)

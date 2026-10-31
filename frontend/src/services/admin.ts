@@ -1,4 +1,13 @@
-import type { ProfileAdmin, ProfileInput, ProjectAdmin, ProjectInput } from '@/types/api'
+import type {
+  AnalyticsReport,
+  ProfileAdmin,
+  ProfileInput,
+  ProjectAdmin,
+  ProjectInput,
+  TranslateResponse,
+  TranslateStatus,
+} from '@/types/api'
+import type { LocaleCode } from '@/types/i18n'
 import { authedRequest } from './auth'
 
 export const adminApi = {
@@ -13,6 +22,17 @@ export const adminApi = {
 
   getProfile: () => authedRequest<ProfileAdmin>('/admin/profile'),
   updateProfile: (data: ProfileInput) => authedRequest<ProfileAdmin>('/admin/profile', { method: 'PUT', body: data }),
+
+  translateStatus: () => authedRequest<TranslateStatus>('/admin/translate/status'),
+  /** Translate `texts` (order preserved) with the Claude API. Slow: allow up to two minutes. */
+  translate: (texts: string[], target: LocaleCode, source: LocaleCode = 'pt-BR') =>
+    authedRequest<TranslateResponse>('/admin/translate', {
+      method: 'POST',
+      body: { source, target, texts },
+      timeoutMs: 120_000,
+    }),
+
+  analytics: (days: number) => authedRequest<AnalyticsReport>('/admin/analytics', { query: { days } }),
 
   uploadImage: async (file: File): Promise<string> => {
     const formData = new FormData()

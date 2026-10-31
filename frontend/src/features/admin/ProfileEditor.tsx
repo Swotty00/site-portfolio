@@ -4,6 +4,8 @@ import { adminApi } from '@/services/admin'
 import type { Education, Experience, Link, ProfileContent, ProfileInput, StackGroup } from '@/types/api'
 import { DEFAULT_LOCALE, type LocaleCode } from '@/types/i18n'
 import { errorMessage } from './errors'
+import { TranslateControls } from './TranslateControls'
+import { profileBatch } from './translate'
 import { Banner, Card, ListEditor, LocaleTabs, TextArea, TextField } from './ui'
 
 const emptyContent = (): ProfileContent => ({
@@ -51,6 +53,7 @@ export function ProfileEditor() {
   if (isPending || !form) return <p className="text-ink/60">Loading…</p>
 
   const content = form.translations[locale] ?? emptyContent()
+  const sourceBatch = profileBatch(form.translations[DEFAULT_LOCALE] ?? emptyContent())
   const patch = (changes: Partial<ProfileInput>) => setForm((f) => (f ? { ...f, ...changes } : f))
   const patchContent = (changes: Partial<ProfileContent>) =>
     setForm((f) =>
@@ -132,13 +135,13 @@ export function ProfileEditor() {
       <Card title="Content by language">
         <LocaleTabs value={locale} onChange={setLocale} filled={(l) => hasContent(form.translations[l])} />
         {locale !== DEFAULT_LOCALE && (
-          <button
-            type="button"
-            className="admin-btn mb-5"
-            onClick={() => patchContent({ ...emptyContent(), ...form.translations[DEFAULT_LOCALE] })}
-          >
-            Copy everything from pt-BR
-          </button>
+          <TranslateControls
+            locale={locale}
+            texts={sourceBatch.texts}
+            hasExisting={hasContent(form.translations[locale])}
+            onTranslated={(translated) => patchContent(sourceBatch.apply(translated))}
+            onCopy={() => patchContent({ ...emptyContent(), ...form.translations[DEFAULT_LOCALE] })}
+          />
         )}
         <div className="space-y-5">
           <TextField

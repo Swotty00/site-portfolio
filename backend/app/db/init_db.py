@@ -12,6 +12,7 @@ from app.core.database import Base, engine
 from app.db import seed_data
 from app.schemas.profile import ProfileUpdate
 from app.schemas.project import ProjectCreate
+from app.services import analytics
 from app.services.auth import bootstrap_admin
 
 logger = logging.getLogger(__name__)
@@ -44,3 +45,7 @@ def init_db(db: Session) -> None:
     bootstrap_admin(db)
     if settings.seed_demo_data:
         seed_demo_content(db)
+    if settings.analytics_enabled:
+        removed = analytics.purge_old(db)
+        if removed:
+            logger.info("Purged %d analytics events older than the retention window", removed)

@@ -16,6 +16,11 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      # Optional AI translation in the admin (create a key at console.anthropic.com). Empty = off.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TRANSLATION_MODEL: ${TRANSLATION_MODEL:-claude-opus-5-5}
+      # Day boundaries for the analytics charts, e.g. America/Sao_Paulo.
+      ANALYTICS_TIMEZONE: ${ANALYTICS_TIMEZONE:-UTC}
       # Trust X-Forwarded-For from nginx. Safe ONLY because the backend port is not published:
       # nginx is the single way in, and it overwrites the header with the real client address.
       FORWARDED_ALLOW_IPS: "*"
@@ -38,11 +43,36 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "${PORT:-8080}:8080"
+      # Localhost only: with the `prod` profile Caddy (below) is the public entry point and adds HTTPS.
+      - "127.0.0.1:${PORT:-8080}:8080"
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
 
+  # Public HTTPS entry point for a real domain.   docker compose --profile prod up -d --build
+  # Needs DNS for DOMAIN (and www.DOMAIN) pointing at this machine and ports 80/443 open.
+  caddy:
+    profiles: ["prod"]
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data # issued certificates: keep it, or you hit Let's Encrypt rate limits
+      - caddy-config:/config
+    depends_on:
+      - frontend
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
 volumes:
   portfolio-data:
+  caddy-data:
+  caddy-config:

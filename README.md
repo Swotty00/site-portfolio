@@ -9,8 +9,9 @@ An immersive portfolio site with a secure admin dashboard, built as a monorepo:
 Palette `#084d6e` (background) · `#DCCBB5` (accent) · `#D8DAD6` (text). Headings in **Space Grotesk**, body in **DM Sans**
 (both self-hosted via Fontsource — no Google Fonts requests).
 
-> The demo content (Alex Morgan, the five projects, the artwork) is **fictional placeholder data**. Replace all of it from
-> the admin dashboard, or start with `SEED_DEMO_DATA=false`.
+> The demo content (Alex Morgan, the five projects, the artwork) is **fictional placeholder data**. Keep
+> `SEED_DEMO_DATA=true` on the first start (the profile editor needs an existing profile), then replace everything from
+> the admin dashboard.
 
 ## Features
 
@@ -23,6 +24,8 @@ Palette `#084d6e` (background) · `#DCCBB5` (accent) · `#D8DAD6` (text). Headin
 | **About overlay**     | "01 about" opens an overlay that is **already in the DOM** (hidden + `inert`); circular reveal and outline→fill typography. Focus-trapped, `Esc` closes                                              |
 | **i18n**              | pt-BR (default), en, es, it, fr, ru, zh, ja. Browser language auto-detected, falls back to pt-BR, choice persisted. Top-right switcher. Project/profile **content** is translated server-side too    |
 | **Easter egg**        | Click the pulsing dot next to the logo (or type ↑↑↓↓←→←→BA) to cycle five colour themes across the whole site                                                                                        |
+| **Analytics**         | First-party, cookie-free traffic dashboard in the admin: pageviews, visitors, top pages/projects, referrers, devices, browsers, site language, résumé downloads, period-over-period deltas. No raw IPs stored; bots, Do-Not-Track and your own browser are ignored |
+| **AI translation**    | "Translate from pt-BR" in the profile and project editors, powered by the Claude API (optional, needs `ANTHROPIC_API_KEY`); "Copy without translating" always works |
 | **Admin**             | `/admin` — project CRUD (create, edit, publish toggle, reorder, delete, image upload), 8-language content editor, profile editor                                                                     |
 | **Accessibility**     | Skip link, keyboard-operable menus/carousel/dialog, `prefers-reduced-motion` disables smoothing & 3D motion, real links for every project                                                            |
 
@@ -121,6 +124,10 @@ See `.env.example` and `backend/app/core/config.py`. The essentials:
 | `CORS_ORIGINS`             | `http://localhost:5173`       | Comma separated                                      |
 | `ALLOWED_HOSTS`            | `*`                           | Set to your domain(s) in production                  |
 | `SEED_DEMO_DATA`           | `true`                        | Seeds only an *empty* database                       |
+| `ANTHROPIC_API_KEY`        | *(empty = translation off)*   | Create at console.anthropic.com; billed per call     |
+| `TRANSLATION_MODEL`        | `claude-opus-5-5`             | e.g. `claude-haiku-5-5` for cheaper/faster           |
+| `ANALYTICS_TIMEZONE`       | `UTC`                         | e.g. `America/Sao_Paulo` (day boundaries in charts)  |
+| `DOMAIN`                   | *(prod profile only)*         | Public domain for the Caddy HTTPS proxy              |
 
 ## Testing & CI/CD
 
@@ -134,6 +141,20 @@ tsc, vitest, build) → advisory dependency audit → **Docker build + smoke tes
 SPA fallback, API through nginx, a real PDF in four languages, and that the admin API rejects anonymous calls) →
 publish images to GHCR on `main`/tags. An opt-in `deploy` job (SSH + `docker compose pull`) is enabled with the
 repository variable `DEPLOY_ENABLED=true`.
+
+## Deploying to your own domain
+
+`docker compose --profile prod up -d --build` adds a Caddy container that serves your domain over HTTPS with
+automatic Let's Encrypt certificates. The full walkthrough — choosing a host (and why Vercel isn't a fit for the
+backend), pointing a Namecheap domain at a VPS, backups and troubleshooting — is in **[docs/DEPLOY.md](docs/DEPLOY.md)**
+(Portuguese).
+
+## Privacy of the analytics
+
+Page views are recorded by the site's own backend: no cookies, no localStorage ID, no raw IP. A visitor is an HMAC of
+IP + User-Agent keyed with a **daily-rotating** salt, so it can't be reversed or linked across days (the same person on
+two days counts as two visitors). Only the referrer hostname is kept, only the site's real routes are accepted, and
+events older than `ANALYTICS_RETENTION_DAYS` (default 400) are purged at startup.
 
 ## Known limitations
 

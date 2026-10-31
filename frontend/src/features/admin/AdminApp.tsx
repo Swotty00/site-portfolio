@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link, NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { AnalyticsPage } from './AnalyticsPage'
 import { AuthProvider, useAuth } from './AuthProvider'
 import { LoginPage } from './LoginPage'
 import { ProfileEditor } from './ProfileEditor'
@@ -40,6 +41,9 @@ function AdminShell() {
               <NavLink to="/admin/profile" className={tab}>
                 Profile
               </NavLink>
+              <NavLink to="/admin/analytics" className={tab}>
+                Analytics
+              </NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
@@ -70,6 +74,7 @@ export default function AdminApp() {
           <Route path="projects/new" element={<ProjectEditor />} />
           <Route path="projects/:id" element={<ProjectEditor />} />
           <Route path="profile" element={<ProfileEditor />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="*" element={<Navigate to="projects" replace />} />
         </Route>
       </Routes>

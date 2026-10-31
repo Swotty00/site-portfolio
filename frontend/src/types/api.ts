@@ -124,3 +124,44 @@ export interface User {
   id: number
   username: string
 }
+
+// ---- Admin: translation & analytics ----------------------------------------------------------
+
+export interface TranslateResponse {
+  texts: string[]
+  model: string
+}
+
+export interface TranslateStatus {
+  enabled: boolean
+  model: string
+}
+
+export interface DayPoint {
+  date: string // YYYY-MM-DD
+  pageviews: number
+  visitors: number
+}
+
+export interface Bucket {
+  name: string // '' = unknown / direct
+  views: number
+  visitors: number
+}
+
+export interface AnalyticsReport {
+  days: number
+  start: string
+  end: string
+  timezone: string
+  totals: { pageviews: number; visitors: number; resume_downloads: number }
+  previous: { pageviews: number; visitors: number }
+  series: DayPoint[]
+  top_pages: Bucket[]
+  top_projects: Bucket[]
+  referrers: Bucket[]
+  countries: Bucket[]
+  devices: Bucket[]
+  browsers: Bucket[]
+  locales: Bucket[]
+}

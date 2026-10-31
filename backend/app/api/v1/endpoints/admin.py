@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 
 from app import crud
 from app.api.deps import DbSession, get_current_user
+from app.core.config import get_settings
+from app.core.rate_limit import translate_limiter
+from app.schemas.analytics import AnalyticsReport
 from app.schemas.profile import ProfileAdmin, ProfileUpdate
 from app.schemas.project import (
     ProjectAdmin,
@@ -14,7 +17,8 @@ from app.schemas.project import (
     ProjectUpdate,
     ReorderRequest,
 )
-from app.services import resume, uploads
+from app.schemas.translate import TranslateRequest, TranslateResponse
+from app.services import analytics, resume, translation, uploads
 
 # Every route in this router requires a valid access token.
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(get_current_user)])
@@ -98,3 +102,27 @@ def update_profile(data: ProfileUpdate, db: DbSession) -> ProfileAdmin:
 @router.post("/uploads", status_code=status.HTTP_201_CREATED)
 async def upload_image(file: UploadFile = File(...)) -> dict[str, str]:
     return {"url": await uploads.save_image(file)}
+
+
+@router.post(
+    "/translate", response_model=TranslateResponse, dependencies=[Depends(translate_limiter)]
+)
+def translate(data: TranslateRequest) -> TranslateResponse:
+    """Translate admin-authored text with the Claude API (see services/translation.py)."""
+    try:
+        texts = translation.translate_texts(data.texts, data.source, data.target)
+    except translation.TranslationError as exc:
+        raise HTTPException(exc.status_code, exc.message) from exc
+    return TranslateResponse(texts=texts, model=get_settings().translation_model)
+
+
+@router.get("/translate/status")
+def translate_status() -> dict[str, object]:
+    """Lets the dashboard show whether the translate button can work before it is clicked."""
+    settings = get_settings()
+    return {"enabled": settings.translation_enabled, "model": settings.translation_model}
+
+
+@router.get("/analytics", response_model=AnalyticsReport)
+def analytics_report(db: DbSession, days: int = Query(30, ge=1, le=366)) -> AnalyticsReport:
+    return analytics.build_report(db, days)

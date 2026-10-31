@@ -39,6 +39,13 @@ def test_untrusted_host_rejected(client: TestClient) -> None:
     assert res.status_code == 400
 
 
+def test_loopback_host_is_always_allowed_for_health_checks(client: TestClient) -> None:
+    # ALLOWED_HOSTS in the test env lists only "testserver,localhost": the Docker health check
+    # (http://127.0.0.1:8000) must still pass, while foreign hosts stay rejected.
+    assert client.get(f"{API}/health", headers={"Host": "127.0.0.1:8000"}).status_code == 200
+    assert client.get(f"{API}/health", headers={"Host": "evil.example"}).status_code == 400
+
+
 def test_unhandled_errors_do_not_leak_details(client: TestClient) -> None:
     assert client.get("/nope").json() == {"detail": "Not Found"}
 

@@ -60,7 +60,12 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type"],
         max_age=600,
     )
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
+    # The container health check calls the API on loopback, so loopback is always allowed: a
+    # domain-only ALLOWED_HOSTS must never make the container report "unhealthy".
+    allowed_hosts = settings.allowed_hosts
+    if "*" not in allowed_hosts:
+        allowed_hosts = [*allowed_hosts, "localhost", "127.0.0.1"]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
     app.add_middleware(SecurityHeadersMiddleware, hsts=settings.is_production)
 
     @app.exception_handler(StarletteHTTPException)

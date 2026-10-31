@@ -6,6 +6,8 @@ import type { Credit, ProjectInput, ProjectTranslation } from '@/types/api'
 import { DEFAULT_LOCALE, type LocaleCode } from '@/types/i18n'
 import { errorMessage } from './errors'
 import { emptyDraft, emptyTranslation, fromProject, slugify, toPayload, type Draft } from './projectForm'
+import { TranslateControls } from './TranslateControls'
+import { projectBatch } from './translate'
 import { Banner, Card, ImageField, ListEditor, LocaleTabs, TextArea, TextField } from './ui'
 
 export function ProjectEditor() {
@@ -44,6 +46,7 @@ export function ProjectEditor() {
 
   const patch = (changes: Partial<Draft>) => setDraft((d) => ({ ...d, ...changes }))
   const tr = draft.translations[locale] ?? emptyTranslation()
+  const sourceBatch = projectBatch(draft.translations[DEFAULT_LOCALE] ?? emptyTranslation())
   const patchTr = (changes: Partial<ProjectTranslation>) =>
     setDraft((d) => {
       const next = {
@@ -117,13 +120,13 @@ export function ProjectEditor() {
           />
         </div>
         {locale !== DEFAULT_LOCALE && (
-          <button
-            type="button"
-            className="admin-btn mt-4"
-            onClick={() => patchTr({ ...emptyTranslation(), ...draft.translations[DEFAULT_LOCALE] })}
-          >
-            Copy from pt-BR
-          </button>
+          <TranslateControls
+            locale={locale}
+            texts={sourceBatch.texts}
+            hasExisting={Boolean(draft.translations[locale]?.title.trim())}
+            onTranslated={(translated) => patchTr(sourceBatch.apply(translated))}
+            onCopy={() => patchTr({ ...emptyTranslation(), ...draft.translations[DEFAULT_LOCALE] })}
+          />
         )}
       </Card>
 

@@ -2,16 +2,21 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from app import crud
 from app.api.deps import DbSession, Locale
+from app.api.v1.endpoints.analytics import client_ip, own_hosts
+from app.core.config import get_settings
 from app.core.rate_limit import pdf_limiter
 from app.schemas.common import SUPPORTED_LOCALES
 from app.schemas.profile import ProfilePublic
 from app.schemas.project import ProjectDetail, ProjectPublic
-from app.services import localization, resume
+from app.services import analytics, localization, resume
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["public"])
 
 _CACHE_HEADERS = {"Cache-Control": "public, max-age=60, stale-while-revalidate=300"}
@@ -53,7 +58,7 @@ def get_profile(db: DbSession, locale: Locale, response: Response) -> ProfilePub
     responses={200: {"content": {"application/pdf": {}}}},
     dependencies=[Depends(pdf_limiter)],
 )
-def download_resume(db: DbSession, locale: Locale) -> Response:
+def download_resume(request: Request, db: DbSession, locale: Locale) -> Response:
     profile = crud.profile.get(db)
     if profile is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Profile not configured yet")
@@ -64,6 +69,20 @@ def download_resume(db: DbSession, locale: Locale) -> Response:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE, "PDF generation is unavailable on this server"
         ) from exc
+    try:  # a failing counter must never block the download
+        analytics.record(
+            db,
+            kind=analytics.RESUME_DOWNLOAD,
+            path="/profile",
+            ip=client_ip(request),
+            user_agent=request.headers.get("user-agent", ""),
+            lang=locale,
+            country_header=request.headers.get(get_settings().analytics_country_header),
+            own_hosts=own_hosts(request),
+        )
+    except Exception:
+        db.rollback()
+        logger.exception("Could not record résumé download")
     filename = f"{profile.name.strip().replace(' ', '_') or 'resume'}_{locale}.pdf"
     safe_filename = "".join(c for c in filename if c.isalnum() or c in "._-")
     return Response(
