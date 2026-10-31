@@ -1,0 +1,48 @@
+# Production-style stack:  docker compose up --build -d   (then open http://localhost:8080)
+# Required settings live in .env (copy .env.example). Compose refuses to start without them.
+services:
+  backend:
+    build:
+      context: ./backend
+    # Overridable so a server can pull the CI-published image instead of building (see ci.yml `deploy`).
+    image: ${BACKEND_IMAGE:-portfolio-backend:latest}
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env (python -c "import secrets; print(secrets.token_urlsafe(48))")}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env (min 12 characters)}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      # Trust X-Forwarded-For from nginx. Safe ONLY because the backend port is not published:
+      # nginx is the single way in, and it overwrites the header with the real client address.
+      FORWARDED_ALLOW_IPS: "*"
+    volumes:
+      - portfolio-data:/data
+    expose:
+      - "8000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: ${FRONTEND_IMAGE:-portfolio-frontend:latest}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${PORT:-8080}:8080"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  portfolio-data:
