@@ -45,7 +45,6 @@ class Settings(BaseSettings):
     rate_limit_default: int = 120  # requests / minute for the public API
     rate_limit_login: int = 5  # login attempts / minute (strict: this is the brute-force target)
     rate_limit_refresh: int = 30  # session refreshes / minute (signed JWT: not brute-forceable)
-    rate_limit_pdf: int = 10  # résumé renders / minute
     rate_limit_translate: int = 10  # AI translation calls / minute (each one costs money)
     rate_limit_collect: int = 60  # analytics beacons / minute per IP
 

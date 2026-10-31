@@ -46,9 +46,7 @@ const ru: Messages = {
     experience: 'Опыт',
     education: 'Образование',
     contact: 'Контакты',
-    download: 'Скачать резюме (PDF)',
-    downloading: 'Создаём PDF…',
-    downloadError: 'Не удалось создать PDF. Попробуйте ещё раз.',
+    resume: 'Открыть резюме',
   },
   error: {
     title: 'Что-то пошло не так',

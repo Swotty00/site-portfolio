@@ -34,6 +34,19 @@ export function resetTrackerForTests(): void {
   firstHit = true
 }
 
+function send(payload: Record<string, string>): void {
+  try {
+    void fetch(`${API_BASE}/analytics/collect`, {
+      method: 'POST',
+      keepalive: true, // survives the page being closed / a new tab opening right after
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => undefined)
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * @param dedupeKey identifies a navigation (e.g. the router's location.key) so that React
  *                  StrictMode's double-invoked effects in development count once.
@@ -47,14 +60,11 @@ export function trackPageview(path: string, lang: string, dedupeKey?: string): v
   // Only the entry page has an external referrer; later hits are in-app navigation.
   const referrer = firstHit ? document.referrer : ''
   firstHit = false
-  try {
-    void fetch(`${API_BASE}/analytics/collect`, {
-      method: 'POST',
-      keepalive: true, // survives the page being closed right after
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, referrer, lang }),
-    }).catch(() => undefined)
-  } catch {
-    /* ignore */
-  }
+  send({ path, referrer, lang })
+}
+
+/** The visitor opened the résumé link on the profile page. */
+export function trackResumeClick(lang: string): void {
+  if (isIgnoringOwnVisits()) return
+  send({ path: '/profile', lang, event: 'resume_click' })
 }

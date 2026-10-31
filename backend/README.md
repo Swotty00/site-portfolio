@@ -19,7 +19,6 @@ ruff check . && ruff format --check . && mypy app
 | GET    | `/projects?lang=`         | –    | Published projects, localized (fallback pt-BR)       |
 | GET    | `/projects/{slug}?lang=`  | –    | Detail + cycling `next` / `previous`                 |
 | GET    | `/profile?lang=`          | –    | Localized profile                                    |
-| GET    | `/resume.pdf?lang=`       | –    | Generated PDF résumé                                 |
 | POST   | `/auth/login`             | –    | Returns access token, sets refresh cookie            |
 | POST   | `/auth/refresh`           | cookie | Rotates tokens                                     |
 | POST   | `/auth/logout`            | cookie | Revokes all tokens for the user                    |
@@ -29,5 +28,5 @@ ruff check . && ruff format --check . && mypy app
 | GET/PUT | `/admin/profile`         | Bearer | Profile metadata + translations                    |
 | POST   | `/admin/uploads`          | Bearer | Image upload (PNG/JPEG/WebP/GIF/AVIF, ≤ 5 MB)      |
 
-PDF generation needs Pango at runtime (`apt install libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0`); without it
-the endpoint answers `503` and the rest of the API keeps working.
+The résumé is **not generated**: the admin stores a link (`resume_url`) and the site simply points to it.
+Existing databases gain the new `profile.resume_url` column automatically at startup.

@@ -46,9 +46,7 @@ const ja: Messages = {
     experience: '職務経歴',
     education: '学歴',
     contact: '連絡先',
-    download: '履歴書をダウンロード (PDF)',
-    downloading: 'PDFを生成中…',
-    downloadError: 'PDFを生成できませんでした。もう一度お試しください。',
+    resume: '履歴書を見る',
   },
   error: {
     title: '問題が発生しました',

@@ -36,10 +36,6 @@ def create_app() -> FastAPI:
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
 
-    # WeasyPrint/fontTools log every render step at INFO.
-    for noisy in ("weasyprint", "fontTools"):
-        logging.getLogger(noisy).setLevel(logging.WARNING)
-
     app = FastAPI(
         title=settings.app_name,
         version="1.0.0",

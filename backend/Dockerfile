@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.7
 # ---------------------------------------------------------------------------------------------
-# Backend image: FastAPI + WeasyPrint. Two stages:
+# Backend image: FastAPI. Two stages:
 #   builder - resolves and installs Python dependencies into a virtualenv
-#   runtime - slim image with only the venv, native PDF libraries/fonts and the app code
+#   runtime - slim image with only the venv and the app code (pure Python: no system packages)
 # ---------------------------------------------------------------------------------------------
 ARG PYTHON_VERSION=3.12
 
@@ -21,21 +21,12 @@ RUN python -c "import tomllib; print('\n'.join(tomllib.load(open('pyproject.toml
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
 
-# Native libraries WeasyPrint needs, plus fonts: Noto covers Latin/Cyrillic, Noto CJK covers the
-# Chinese and Japanese résumés. (DM Sans / Space Grotesk are bundled with the app.)
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 \
-      fontconfig fonts-noto-core fonts-noto-cjk \
- && rm -rf /var/lib/apt/lists/*
-
 ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     ENVIRONMENT=production \
     DATABASE_URL=sqlite:////data/portfolio.db \
-    UPLOAD_DIR=/data/uploads \
-    XDG_CACHE_HOME=/tmp/.cache
+    UPLOAD_DIR=/data/uploads
 
 # Unprivileged user; /data is the only writable location (mount a volume there).
 RUN groupadd --system --gid 10001 app \

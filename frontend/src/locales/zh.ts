@@ -46,9 +46,7 @@ const zh: Messages = {
     experience: '工作经历',
     education: '教育背景',
     contact: '联系方式',
-    download: '下载简历 (PDF)',
-    downloading: '正在生成 PDF…',
-    downloadError: '无法生成 PDF，请重试。',
+    resume: '查看简历',
   },
   error: {
     title: '出错了',

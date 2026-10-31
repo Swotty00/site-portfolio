@@ -196,10 +196,10 @@ PROFILE: dict[str, Any] = {
     "email": "hello@example.com",
     "phone": "",
     "location": "São Paulo, BR",
+    "resume_url": "",  # set your own in the admin (Profile → Résumé link)
     "links": [
         {"label": "GitHub", "url": "https://github.com/"},
         {"label": "LinkedIn", "url": "https://www.linkedin.com/"},
-        {"label": "Read.cv", "url": "https://read.cv/"},
     ],
 }
 

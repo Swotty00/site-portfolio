@@ -282,15 +282,23 @@ def test_end_to_end_beacon_to_report(client: TestClient, auth_headers: dict[str,
     assert r["totals"]["visitors"] == 2  # Chrome and iPhone share the test IP but differ in UA
 
 
-def test_resume_download_is_counted(client: TestClient, auth_headers: dict[str, str]) -> None:
-    pytest.importorskip("weasyprint")
-    res = client.get(f"{API}/resume.pdf", params={"lang": "en"}, headers={"User-Agent": CHROME})
-    if res.status_code == 503:
-        pytest.skip("Pango not installed")
-    assert res.status_code == 200
-    r = client.get(REPORT, headers=auth_headers).json()
-    assert r["totals"]["resume_downloads"] == 1
-    assert r["totals"]["pageviews"] == 0  # a download is not a page view
+def test_resume_click_is_counted_separately_from_pageviews(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    assert hit(client, "/profile", event="resume_click", lang="en") == 204
+    assert [(r.kind, r.path) for r in rows()] == [("resume_download", "/profile")]
+    report = client.get(REPORT, headers=auth_headers).json()
+    assert report["totals"]["resume_downloads"] == 1
+    assert report["totals"]["pageviews"] == 0  # a click is not a page view
+
+
+def test_unknown_events_are_rejected(client: TestClient) -> None:
+    assert (
+        client.post(
+            COLLECT, json={"path": "/", "event": "purchase"}, headers={"User-Agent": CHROME}
+        ).status_code
+        == 422
+    )
 
 
 # --- retention & timezone ---

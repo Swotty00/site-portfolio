@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+from sqlalchemy import Engine, inspect, text
 from sqlalchemy.orm import Session
 
 from app import crud, models  # noqa: F401  (models import registers tables on Base.metadata)
@@ -16,6 +17,27 @@ from app.services import analytics
 from app.services.auth import bootstrap_admin
 
 logger = logging.getLogger(__name__)
+
+
+# Columns added after the first release. `create_all()` never alters an existing table, so databases
+# created by an older version get them here. Idempotent; plain DDL that SQLite and Postgres accept.
+_ADDED_COLUMNS: tuple[tuple[str, str, str], ...] = (
+    ("profile", "resume_url", "VARCHAR(500) NOT NULL DEFAULT ''"),
+)
+
+
+def ensure_columns(bind: Engine) -> list[str]:
+    """Add any column from `_ADDED_COLUMNS` that the database is missing. Returns what was added."""
+    added: list[str] = []
+    inspector = inspect(bind)
+    for table, column, ddl in _ADDED_COLUMNS:
+        if not inspector.has_table(table):
+            continue
+        if column not in {c["name"] for c in inspector.get_columns(table)}:
+            with bind.begin() as conn:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))  # noqa: S608
+            added.append(f"{table}.{column}")
+    return added
 
 
 def seed_demo_content(db: Session) -> None:
@@ -42,6 +64,8 @@ def init_db(db: Session) -> None:
 
             Path(path).parent.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
+    for added in ensure_columns(engine):
+        logger.info("Migrated database: added column %s", added)
     bootstrap_admin(db)
     if settings.seed_demo_data:
         seed_demo_content(db)

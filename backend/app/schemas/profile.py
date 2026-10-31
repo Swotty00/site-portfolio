@@ -62,6 +62,7 @@ class ProfileUpdate(BaseModel):
     email: EmailStr | None = None
     phone: Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] = ""
     location: ShortText = ""
+    resume_url: SafeUrl = ""  # http(s) URL or a same-origin path such as /curriculo.pdf
     links: list[Link] = Field(default_factory=list, max_length=12)
     translations: dict[LocaleCode, ProfileContent]
 
@@ -78,6 +79,7 @@ class ProfileAdmin(ORMModel):
     email: str
     phone: str
     location: str
+    resume_url: str
     links: list[Link]
     translations: dict[str, ProfileContent]
     updated_at: datetime
@@ -88,5 +90,6 @@ class ProfilePublic(ProfileContent):
     email: str
     phone: str
     location: str
+    resume_url: str = ""
     links: list[Link]
     locale: LocaleCode

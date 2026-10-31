@@ -69,6 +69,8 @@ export interface ProfilePublic extends ProfileContent {
   email: string
   phone: string
   location: string
+  /** Link to the résumé PDF, set by hand in the admin. Empty = no button. */
+  resume_url: string
   links: Link[]
   locale: LocaleCode
 }
@@ -107,6 +109,7 @@ export interface ProfileAdmin {
   email: string
   phone: string
   location: string
+  resume_url: string
   links: Link[]
   translations: Partial<Record<LocaleCode, ProfileContent>>
   updated_at: string

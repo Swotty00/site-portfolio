@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useRef, useState, type ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { ErrorState } from '@/components/ErrorState'
 import { PageLoader } from '@/components/PageLoader'
 import { SplitText } from '@/components/SplitText'
@@ -9,8 +9,7 @@ import { usePageEnter } from '@/features/transitions/usePageEnter'
 import { useProfile } from '@/hooks/useContent'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { prefersReducedMotion } from '@/hooks/useReducedMotion'
-import { downloadResume } from '@/services/content'
-import { ApiError } from '@/services/http'
+import { trackResumeClick } from '@/services/analytics'
 
 function Section({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
@@ -44,8 +43,6 @@ export default function ProfilePage() {
   const { t, locale } = useI18n()
   const { data: profile, error, isPending, refetch } = useProfile()
   const rootRef = useRef<HTMLDivElement>(null)
-  const [download, setDownload] = useState<'idle' | 'loading' | 'error'>('idle')
-  const [downloadDetail, setDownloadDetail] = useState('')
 
   useDocumentTitle(profile ? `${t('nav.profile')} — ${profile.name}` : undefined, profile?.bio)
 
@@ -73,19 +70,6 @@ export default function ProfilePage() {
     }, root)
     return () => ctx.revert()
   })
-
-  const onDownload = async () => {
-    if (!profile || download === 'loading') return
-    setDownload('loading')
-    setDownloadDetail('')
-    try {
-      await downloadResume(locale, `${profile.name.replace(/\s+/g, '_')}_${locale}.pdf`)
-      setDownload('idle')
-    } catch (err) {
-      setDownload('error')
-      if (err instanceof ApiError && err.status && err.status !== 503) setDownloadDetail(`(${err.status})`)
-    }
-  }
 
   if (error && !profile) return <ErrorState error={error} onRetry={() => void refetch()} className="pt-40" />
   if (isPending || !profile) return <PageLoader />
@@ -128,25 +112,31 @@ export default function ProfilePage() {
             ))}
           </ul>
 
-          <div data-enter-item className="mt-10">
-            <button type="button" className="btn" disabled={download === 'loading'} onClick={() => void onDownload()}>
-              {download === 'loading' ? t('profile.downloading') : t('profile.download')}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                aria-hidden="true"
+          {profile.resume_url && (
+            <div data-enter-item className="mt-10">
+              {/* The PDF is yours to host (read.cv, Drive, or /public): we only link to it. */}
+              <a
+                href={profile.resume_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                onClick={() => trackResumeClick(locale)}
               >
-                <path d="M12 3v13m0 0-5-5m5 5 5-5M4 21h16" />
-              </svg>
-            </button>
-            <p role="status" className="mt-3 min-h-5 text-sm text-red-200">
-              {download === 'error' && `${t('profile.downloadError')} ${downloadDetail}`}
-            </p>
-          </div>
+                {t('profile.resume')}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M7 17 17 7M8 7h9v9" />
+                </svg>
+              </a>
+            </div>
+          )}
         </aside>
 
         <div className="lg:col-span-7">

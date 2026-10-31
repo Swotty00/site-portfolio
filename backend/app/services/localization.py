@@ -94,6 +94,7 @@ def localize_profile(profile: Any, locale: LocaleCode) -> ProfilePublic:
         email=profile.email,
         phone=profile.phone,
         location=profile.location,
+        resume_url=profile.resume_url or "",
         links=profile.links,
         locale=resolved,
         **content.model_dump(),

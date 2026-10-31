@@ -46,9 +46,7 @@ const es: Messages = {
     experience: 'Experiencia',
     education: 'Formación',
     contact: 'Contacto',
-    download: 'Descargar currículum (PDF)',
-    downloading: 'Generando PDF…',
-    downloadError: 'No se pudo generar el PDF. Inténtalo de nuevo.',
+    resume: 'Ver currículum',
   },
   error: {
     title: 'Algo salió mal',

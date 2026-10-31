@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { IGNORE_KEY, isIgnoringOwnVisits, resetTrackerForTests, setIgnoreOwnVisits, trackPageview } from './analytics'
+import {
+  IGNORE_KEY,
+  isIgnoringOwnVisits,
+  resetTrackerForTests,
+  setIgnoreOwnVisits,
+  trackPageview,
+  trackResumeClick,
+} from './analytics'
 
 function stubFetch() {
   const fetchMock = vi.fn(async () => new Response(null, { status: 204 }))
@@ -73,5 +80,28 @@ describe('trackPageview', () => {
       throw new Error('sync failure')
     })
     expect(() => trackPageview('/', 'en', 'k2')).not.toThrow()
+  })
+})
+
+describe('trackResumeClick', () => {
+  it('reports a résumé click on the profile page with the site language', () => {
+    const fetchMock = stubFetch()
+    trackResumeClick('ja')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(body(fetchMock)).toEqual({ path: '/profile', lang: 'ja', event: 'resume_click' })
+    expect((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].keepalive).toBe(true)
+  })
+
+  it('does not count the owner’s own clicks, and never throws', () => {
+    const fetchMock = stubFetch()
+    setIgnoreOwnVisits(true)
+    trackResumeClick('en')
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    setIgnoreOwnVisits(false)
+    vi.stubGlobal('fetch', () => {
+      throw new Error('boom')
+    })
+    expect(() => trackResumeClick('en')).not.toThrow()
   })
 })

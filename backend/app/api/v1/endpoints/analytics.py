@@ -41,7 +41,9 @@ def collect(payload: CollectRequest, request: Request, db: DbSession) -> Respons
     try:
         analytics.record(
             db,
-            kind=analytics.PAGEVIEW,
+            kind=analytics.RESUME_DOWNLOAD
+            if payload.event == "resume_click"
+            else analytics.PAGEVIEW,
             path=payload.path,
             ip=client_ip(request),
             user_agent=request.headers.get("user-agent", ""),

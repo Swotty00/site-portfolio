@@ -18,7 +18,7 @@ from app.schemas.project import (
     ReorderRequest,
 )
 from app.schemas.translate import TranslateRequest, TranslateResponse
-from app.services import analytics, resume, translation, uploads
+from app.services import analytics, translation, uploads
 
 # Every route in this router requires a valid access token.
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(get_current_user)])
@@ -95,7 +95,6 @@ def get_profile(db: DbSession) -> ProfileAdmin:
 @router.put("/profile", response_model=ProfileAdmin)
 def update_profile(data: ProfileUpdate, db: DbSession) -> ProfileAdmin:
     profile = crud.profile.upsert(db, data)
-    resume.clear_cache()
     return ProfileAdmin.model_validate(profile)
 
 

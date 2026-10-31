@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
@@ -16,6 +16,8 @@ class CollectRequest(BaseModel):
     path: Annotated[str, StringConstraints(max_length=200)]
     referrer: Annotated[str, StringConstraints(max_length=500)] = ""
     lang: LocaleCode | None = None
+    # "resume_click" is sent when the visitor opens the résumé link; omitted for page views.
+    event: Literal["resume_click"] | None = None
 
 
 class DayPoint(BaseModel):

@@ -75,6 +75,5 @@ class RateLimiter:
 default_limiter = RateLimiter("default", lambda: get_settings().rate_limit_default)
 login_limiter = RateLimiter("login", lambda: get_settings().rate_limit_login)
 refresh_limiter = RateLimiter("refresh", lambda: get_settings().rate_limit_refresh)
-pdf_limiter = RateLimiter("pdf", lambda: get_settings().rate_limit_pdf)
 translate_limiter = RateLimiter("translate", lambda: get_settings().rate_limit_translate)
 collect_limiter = RateLimiter("collect", lambda: get_settings().rate_limit_collect)

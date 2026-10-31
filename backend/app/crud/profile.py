@@ -16,6 +16,7 @@ def upsert(db: Session, data: ProfileUpdate) -> Profile:
     profile.email = data.email or ""
     profile.phone = data.phone
     profile.location = data.location
+    profile.resume_url = data.resume_url
     profile.links = [link.model_dump(mode="json") for link in data.links]
     profile.translations = {k: v.model_dump(mode="json") for k, v in data.translations.items()}
     db.add(profile)

@@ -42,7 +42,7 @@ export function ProfileEditor() {
   const save = useMutation({
     mutationFn: (payload: ProfileInput) => adminApi.updateProfile(payload),
     onSuccess: () => {
-      setMessage({ kind: 'success', text: 'Profile saved. The résumé PDF will use the new content.' })
+      setMessage({ kind: 'success', text: 'Profile saved.' })
       void queryClient.invalidateQueries({ queryKey: ['admin', 'profile'] })
       void queryClient.invalidateQueries({ queryKey: ['content'] })
     },
@@ -104,6 +104,16 @@ export function ProfileEditor() {
             value={form.location}
             onChange={(e) => patch({ location: e.target.value })}
             maxLength={200}
+          />
+          <TextField
+            className="md:col-span-2"
+            label="Résumé link (PDF)"
+            hint="Where your PDF lives: a link (read.cv, Google Drive…) or a file in the site's public folder, e.g. /curriculo.pdf. Leave empty to hide the button."
+            inputMode="url"
+            placeholder="https://… or /curriculo.pdf"
+            value={form.resume_url}
+            onChange={(e) => patch({ resume_url: e.target.value })}
+            maxLength={500}
           />
         </div>
         <h3 className="field-label mt-6">Links</h3>

@@ -46,9 +46,7 @@ const en: Messages = {
     experience: 'Experience',
     education: 'Education',
     contact: 'Contact',
-    download: 'Download résumé (PDF)',
-    downloading: 'Preparing PDF…',
-    downloadError: "Couldn't generate the PDF. Please try again.",
+    resume: 'View résumé',
   },
   error: {
     title: 'Something went wrong',

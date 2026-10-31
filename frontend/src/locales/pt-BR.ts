@@ -45,9 +45,7 @@ const ptBR = {
     experience: 'Experiência',
     education: 'Formação',
     contact: 'Contato',
-    download: 'Baixar currículo (PDF)',
-    downloading: 'Gerando PDF…',
-    downloadError: 'Não foi possível gerar o PDF. Tente novamente.',
+    resume: 'Ver currículo',
   },
   error: {
     title: 'Algo deu errado',

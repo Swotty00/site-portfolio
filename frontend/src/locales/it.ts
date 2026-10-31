@@ -46,9 +46,7 @@ const it: Messages = {
     experience: 'Esperienza',
     education: 'Formazione',
     contact: 'Contatti',
-    download: 'Scarica il CV (PDF)',
-    downloading: 'Creazione del PDF…',
-    downloadError: 'Impossibile generare il PDF. Riprova.',
+    resume: 'Vedi il CV',
   },
   error: {
     title: 'Qualcosa è andato storto',

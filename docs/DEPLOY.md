@@ -4,9 +4,8 @@ Este guia leva o projeto do seu computador até `https://seudominio.com`, com HT
 
 ## 1. Onde hospedar?
 
-O projeto não é só um site estático: o backend usa **um arquivo SQLite**, **grava imagens enviadas em disco**, gera PDF
-com **WeasyPrint** (que precisa de bibliotecas do sistema, como Pango) e guarda contadores em memória. Isso pede uma
-máquina "de verdade" com disco persistente.
+O projeto não é só um site estático: o backend usa **um arquivo SQLite**, **grava imagens enviadas em disco** e guarda
+contadores em memória. Isso pede uma máquina "de verdade" com disco persistente.
 
 | Opção | Serve? | Observação |
 | --- | --- | --- |
@@ -111,7 +110,7 @@ O Caddy emite o certificado sozinho na primeira visita (leva alguns segundos). A
 - `https://seudominio.com` abre o site (e `www.` redireciona para o domínio sem `www`).
 - `https://seudominio.com/admin` → entre com `admin` e a senha do `.env`.
 - No admin: edite **Profile** e **Projects**, apague os exemplos e confira **Analytics**.
-- Teste o PDF: página *Profile* → *Download résumé*.
+- Currículo: em *Profile → Résumé link* cole o link do seu PDF; o botão aparece na página *Profile* (veja a seção 4).
 
 ## 3. Rotina
 
@@ -147,6 +146,20 @@ cadastrado no admin.**
 > limite de requisições e a contagem de visitantes (que dependem do IP real) perderiam precisão. Para usá-lo, configure o
 > Caddy com `trusted_proxies` e `client_ip_headers CF-Connecting-IP` (veja a documentação do Caddy). Essa combinação
 > **não foi testada** aqui; sem ela, deixe o registro DNS-only.
+
+## 4.1 Currículo (PDF)
+
+O site **não gera** o currículo: ele só aponta para o PDF que você escolher, no campo **Profile → Résumé link** do
+admin. Se o campo estiver vazio, o botão não aparece. Onde hospedar o arquivo:
+
+| Onde | Link para colar | Observação |
+| --- | --- | --- |
+| **No próprio site** (recomendado) | `/curriculo.pdf` | Coloque o arquivo em `frontend/public/curriculo.pdf` e faça o deploy (`docker compose --profile prod up -d --build`). Sem terceiros. Atenção: se o repositório for público, o PDF e os dados pessoais dele também ficam públicos. |
+| Google Drive / Dropbox | o link de compartilhamento ("qualquer pessoa com o link") | Simples; depende de um terceiro. |
+| read.cv | o link da sua página | O Read.cv foi comprado pela Perplexity e encerrado em 2025; confirme que o seu perfil ainda existe antes de depender dele. |
+
+Para trocar o PDF no próprio site, substitua o arquivo e faça o deploy de novo (os navegadores podem manter o antigo em
+cache por um tempo: renomeie, por exemplo `curriculo-2026.pdf`, e atualize o link no admin).
 
 ## 5. Problemas comuns
 

@@ -123,7 +123,7 @@ export function AnalyticsPage() {
               label="Pages per visitor"
               value={data.totals.visitors ? (data.totals.pageviews / data.totals.visitors).toFixed(1) : '—'}
             />
-            <StatTile label="Résumé downloads" value={formatCount(data.totals.resume_downloads)} />
+            <StatTile label="Résumé clicks" value={formatCount(data.totals.resume_downloads)} />
           </div>
 
           <Card>

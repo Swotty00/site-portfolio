@@ -33,7 +33,7 @@ from app.schemas.analytics import (
 from app.schemas.common import SUPPORTED_LOCALES
 
 PAGEVIEW = "pageview"
-RESUME_DOWNLOAD = "resume_download"
+RESUME_DOWNLOAD = "resume_download"  # stored name kept stable; counts clicks on the résumé link
 
 _BOT_RE = re.compile(
     r"bot|crawl|spider|slurp|headless|lighthouse|pagespeed|gtmetrix|curl|wget|python-requests|"
