@@ -195,7 +195,7 @@ jobs:
           source: docker-compose.yml
           target: ~/portfolio
       - name: Pull and restart
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
