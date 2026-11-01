@@ -20,7 +20,7 @@ class Profile(Base):
     email: Mapped[str] = mapped_column(String(254), default="")
     phone: Mapped[str] = mapped_column(String(40), default="")
     location: Mapped[str] = mapped_column(String(120), default="")
-    # Link to the résumé PDF, written by hand in the admin (read.cv, Drive, or a file in /public).
+    # Link to the résumé PDF, written by hand in the admin (Drive, Dropbox, or a file in /public).
     resume_url: Mapped[str] = mapped_column(String(500), default="")
     links: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
     # {"pt-BR": {"headline", "bio", "about", "stack", "experience", "education"}, "en": {...}}

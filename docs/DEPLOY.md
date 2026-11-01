@@ -154,9 +154,8 @@ admin. Se o campo estiver vazio, o botão não aparece. Onde hospedar o arquivo:
 
 | Onde | Link para colar | Observação |
 | --- | --- | --- |
-| **No próprio site** (recomendado) | `/curriculo.pdf` | Coloque o arquivo em `frontend/public/curriculo.pdf` e faça o deploy (`docker compose --profile prod up -d --build`). Sem terceiros. Atenção: se o repositório for público, o PDF e os dados pessoais dele também ficam públicos. |
+| **No próprio site** (recomendado) | `/curriculo.pdf` | Coloque o arquivo em `frontend/public/curriculo.pdf` e faça o deploy (`docker compose --profile prod up -d --build`). Sem terceiros. Atenção ao nome: no Windows, com extensões ocultas, `curriculo.pdf` vira `curriculo.pdf.pdf`; confira com `git ls-files frontend/public`. Atenção: se o repositório for público, o PDF e os dados pessoais dele também ficam públicos. |
 | Google Drive / Dropbox | o link de compartilhamento ("qualquer pessoa com o link") | Simples; depende de um terceiro. |
-| read.cv | o link da sua página | O Read.cv foi comprado pela Perplexity e encerrado em 2025; confirme que o seu perfil ainda existe antes de depender dele. |
 
 Para trocar o PDF no próprio site, substitua o arquivo e faça o deploy de novo (os navegadores podem manter o antigo em
 cache por um tempo: renomeie, por exemplo `curriculo-2026.pdf`, e atualize o link no admin).

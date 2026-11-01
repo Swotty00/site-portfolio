@@ -10,6 +10,7 @@ import { useProfile } from '@/hooks/useContent'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { prefersReducedMotion } from '@/hooks/useReducedMotion'
 import { trackResumeClick } from '@/services/analytics'
+import { TechLink } from './TechLink'
 
 function Section({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
@@ -114,7 +115,7 @@ export default function ProfilePage() {
 
           {profile.resume_url && (
             <div data-enter-item className="mt-10">
-              {/* The PDF is yours to host (read.cv, Drive, or /public): we only link to it. */}
+              {/* The PDF is yours to host (Drive, Dropbox, or /public): we only link to it. */}
               <a
                 href={profile.resume_url}
                 target="_blank"
@@ -146,7 +147,13 @@ export default function ProfilePage() {
                 {profile.stack.map((group) => (
                   <div key={group.category}>
                     <h3 className="mb-4 font-display text-lg font-semibold">{group.category}</h3>
-                    <Bullets items={group.items} />
+                    <ul className="flex flex-wrap gap-2">
+                      {group.items.map((item) => (
+                        <li key={item}>
+                          <TechLink name={item} />
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 ))}
               </div>

@@ -108,7 +108,7 @@ export function ProfileEditor() {
           <TextField
             className="md:col-span-2"
             label="Résumé link (PDF)"
-            hint="Where your PDF lives: a link (read.cv, Google Drive…) or a file in the site's public folder, e.g. /curriculo.pdf. Leave empty to hide the button."
+            hint="Where your PDF lives: a link (Google Drive, Dropbox…) or a file in the site's public folder, e.g. /curriculo.pdf. Leave empty to hide the button."
             inputMode="url"
             placeholder="https://… or /curriculo.pdf"
             value={form.resume_url}

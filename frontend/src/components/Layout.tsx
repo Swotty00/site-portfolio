@@ -18,7 +18,7 @@ export function Layout() {
   const [origin, setOrigin] = useState({ x: 48, y: 40 })
   const triggerRef = useRef<HTMLElement | null>(null)
 
-  useDocumentTitle(profile ? `${profile.name} — ${t('meta.tagline')}` : undefined, t('meta.description'))
+  useDocumentTitle(profile?.name, t('meta.description'))
 
   const openAbout = useCallback((trigger: HTMLElement) => {
     const rect = trigger.getBoundingClientRect()
